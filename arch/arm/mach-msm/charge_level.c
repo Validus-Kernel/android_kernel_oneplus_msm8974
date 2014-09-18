@@ -132,7 +132,7 @@ int charge_level_init(void)
 
         if (!charge_level_kobj)
 	{
-		printk("Boeffla-Kernel: failed to create kernel object for charge level interface.\n");
+		printk("Charger-Control: failed to create kernel object for charge level interface.\n");
                 return -ENOMEM;
         }
 
@@ -141,12 +141,12 @@ int charge_level_init(void)
         if (charge_level_retval)
 	{
 			kobject_put(charge_level_kobj);
-		printk("Boeffla-Kernel: failed to create fs object for charge level interface.\n");
+		printk("Charger-Control: failed to create fs object for charge level interface.\n");
 	        return (charge_level_retval);
 	}
 
 	// print debug info
-	printk("Boeffla-Kernel: charge level interface started.\n");
+	printk("Charger-Control: charge level interface started.\n");
 
         return (charge_level_retval);
 }
@@ -157,7 +157,7 @@ void charge_level_exit(void)
 	kobject_put(charge_level_kobj);
 
 	// print debug info
-	printk("Boeffla-Kernel: charge level interface stopped.\n");
+	printk("Charger-Control: charge level interface stopped.\n");
 }
 
 

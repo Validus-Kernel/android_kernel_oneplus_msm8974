@@ -42,10 +42,6 @@
 #include <linux/qpnp-charger.h>
 #endif
 
-#ifdef CONFIG_FORCE_FAST_CHARGE
-#include <linux/fastchg.h>
-#endif
-
 #ifdef CONFIG_CHARGE_LEVEL
 #include "linux/charge_level.h"
 int ac_level = AC_CHARGE_LEVEL_DEFAULT;    // Set AC default charge level
