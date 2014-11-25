@@ -54,6 +54,7 @@ struct cpufreq_interactive_cpuinfo {
 	unsigned int max_freq;
 	u64 floor_validate_time;
 	u64 hispeed_validate_time; /* cluster hispeed_validate_time */
+	u64 local_hvtime; /* per-cpu hispeed_validate_time */
 	u64 max_freq_idle_start_time;
 	u64 max_freq_hyst_start_time;
 	struct rw_semaphore enable_sem;
@@ -428,6 +429,8 @@ static void cpufreq_interactive_timer(unsigned long data)
 		goto rearm;
 	}
 
+	pcpu->local_hvtime = now;
+
 	if (cpufreq_frequency_table_target(pcpu->policy, pcpu->freq_table,
 					   new_freq, CPUFREQ_RELATION_L,
 					   &index)) {
@@ -596,14 +599,12 @@ static int cpufreq_interactive_speedchange_task(void *data)
 			}
 
 			if (max_freq != pcpu->policy->cur) {
-				u64 now;
 				__cpufreq_driver_target(pcpu->policy,
 							max_freq,
 							CPUFREQ_RELATION_H);
-				now = ktime_to_us(ktime_get());
 				for_each_cpu(j, pcpu->policy->cpus) {
 					pjcpu = &per_cpu(cpuinfo, j);
-					pjcpu->hispeed_validate_time = now;
+					pjcpu->hispeed_validate_time = hvt;
 				}
 			}
 			trace_cpufreq_interactive_setspeed(cpu,
