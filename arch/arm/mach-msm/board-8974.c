@@ -46,6 +46,38 @@
 #include "modem_notifier.h"
 #include "platsmp.h"
 
+#endif
+#ifdef CONFIG_VENDOR_EDIT
+static char boot_mode[16];
+static int __init boot_mode_init(void)
+{
+	int i;
+	char *substr = strstr(boot_command_line, "androidboot.mode=");
+	substr += strlen("androidboot.mode=");
+	for(i=0; substr[i] != ' '; i++) {
+		boot_mode[i] = substr[i];
+	}
+	boot_mode[i] = '\0';
+
+	printk(KERN_INFO "%s: parse boot_mode is %s\n", __func__, boot_mode);
+
+	if (!strcmp(boot_mode, "normal"))
+		ftm_mode = MSM_BOOT_MODE__NORMAL;
+	else if (!strcmp(boot_mode, "factory"))
+		ftm_mode = MSM_BOOT_MODE__FACTORY;
+	else if (!strcmp(boot_mode, "recovery"))
+		ftm_mode = MSM_BOOT_MODE__RECOVERY;
+	else if (!strcmp(boot_mode, "charger"))
+		ftm_mode = MSM_BOOT_MODE__CHARGE;
+	else
+		ftm_mode = MSM_BOOT_MODE__NORMAL;
+
+	printk(KERN_INFO "%s: parse ftm_mode is %d\n", __func__, ftm_mode);
+
+	return 1;
+}
+//__setup("androidboot.mode=", boot_mode_setup);
+
 void __init msm_8974_reserve(void)
 {
 	of_scan_flat_dt(dt_scan_for_memory_reserve, NULL);
@@ -135,10 +167,61 @@ void __init msm8974_init(void)
 	if (socinfo_init() < 0)
 		pr_err("%s: socinfo_init() failed\n", __func__);
 
+#ifdef CONFIG_VENDOR_EDIT
+	boot_mode_init();
+#endif //CONFIG_VENDOR_EDIT
+
 	msm_8974_init_gpiomux();
 	regulator_has_full_constraints();
 	board_dt_populate(adata);
 	msm8974_add_drivers();
+/*OPPO yuyi 2013-07-15 add begin for version */
+#ifdef CONFIG_VENDOR_EDIT
+	oppo_config_display();
+	board_pcb_verison_init();
+	board_rf_version_init();
+
+#endif
+/*OPPO yuyi 2013-07-15 add end for version*/
+
+
+#ifdef CONFIG_VENDOR_EDIT
+	/* OPPO 2013.07.09 hewei add begin for factory mode*/
+	systeminfo_kobj = kobject_create_and_add("systeminfo", NULL);
+	printk("songxh create systeminto node suscess!\n");
+	if (systeminfo_kobj)
+		rc = sysfs_create_group(systeminfo_kobj, &attr_group);
+	/* OPPO 2013.07.09 hewei add end */
+#endif //CONFIG_VENDOR_EDIT
+}
+
+#ifdef CONFIG_VENDOR_EDIT
+//Zhilong.Zhang@OnlineRd.Driver, 2013/12/03, Add for ram_console device
+static struct persistent_ram_descriptor msm_prd[] __initdata = {
+	{
+		.name = "ram_console",
+		.size = SZ_1M,
+	},
+};
+
+static struct persistent_ram msm_pr __initdata = {
+	.descs = msm_prd,
+	.num_descs = ARRAY_SIZE(msm_prd),
+	.start = /*0xE0200000,//*/PLAT_PHYS_OFFSET + SZ_1G + SZ_512M,
+	.size = SZ_1M,
+};
+#endif  /* VENDOR_EDIT */
+
+void __init msm8974_init_very_early(void)
+{
+	msm8974_early_memory();
+#ifdef CONFIG_VENDOR_EDIT	
+//Zhilong.Zhang@OnlineRd.Driver, 2013/12/03, Add for ram_console device
+	persistent_ram_early_init(&msm_pr);
+#endif  /* VENDOR_EDIT */
+
+
+
 }
 
 static const char *msm8974_dt_match[] __initconst = {
