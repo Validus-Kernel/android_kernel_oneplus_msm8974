@@ -80,10 +80,8 @@ static int lm3630_chip_init(struct lm3630_chip_data *pchip)
 	if (ret < 0)
 		goto out;
     /* For normal mode, enable pwm control by Xinqin.Yang@PhoneSW.Driver, 2013/12/20 */
-    //if (get_pcb_version() < HW_VERSION__20) { /* For  Find7 */
-        if (get_boot_mode() == MSM_BOOT_MODE__NORMAL ||
-        	get_boot_mode() == MSM_BOOT_MODE__RECOVERY ||
-        	get_boot_mode() == MSM_BOOT_MODE__CHARGE) {
+    //if (get_pcb_version() < HW_VERSION__20) { /* For Find7 */
+        if (get_boot_mode() == MSM_BOOT_MODE__NORMAL) {
         	ret = regmap_update_bits(pchip->regmap, REG_CONFIG, 0x01, 0x01);
         	if (ret < 0)
         		goto out;
@@ -359,7 +357,14 @@ static ssize_t ftmbacklight_store(struct device *dev,
     if (!count)
 		return -EINVAL;
 
+#if 0
+    /* this function is for ftm mode, it doesn't work when normal boot */
+    if(get_boot_mode() == MSM_BOOT_MODE__FACTORY) {
+        level = simple_strtoul(buf, NULL, 10);
 
+        lm3630_bank_a_update_status(level);
+    }
+#endif
     level = simple_strtoul(buf, NULL, 10);
     lm3630_bank_a_update_status(level);
 
@@ -566,36 +571,6 @@ void lm3630_recover_max_current(void)
 	regmap_write(lm3630_pchip->regmap, REG_MAXCU_A, 0x12);
 	regmap_write(lm3630_pchip->regmap, REG_MAXCU_B, 0x12);
 }
-#endif /*VENDOR_EDIT*/
-
-
-#ifdef CONFIG_VENDOR_EDIT
-/* Xiaori.Yuan@Mobile Phone Software Dept.Driver, 2014/02/17  Add for set cabc */
-int set_backlight_pwm(int state)
-{
-    int rc = 0;
-	//if (get_pcb_version() < HW_VERSION__20) { /* For Find7 */
-        if (get_boot_mode() == MSM_BOOT_MODE__NORMAL ||
-        	get_boot_mode() == MSM_BOOT_MODE__RECOVERY ||
-        	get_boot_mode() == MSM_BOOT_MODE__CHARGE) {
-			if( state == 1 && backlight_level <= 0x14 ) return rc;
-        	if(state == 1)
-    		{
-       			 rc = regmap_update_bits(lm3630_pchip->regmap, REG_CONFIG, 0x01, 0x01);
-				 pwm_flag = true;
-   		    }
-   			else
-   			{
-    		     rc = regmap_update_bits(lm3630_pchip->regmap, REG_CONFIG, 0x01, 0x00);
-				 pwm_flag = false;
-  			}
-        }
-    //}
-    return rc;
-}
-#endif /*VENDOR_EDIT*/
-
-
 
 #ifdef CONFIG_OF
 static struct of_device_id lm3630_table[] = {
