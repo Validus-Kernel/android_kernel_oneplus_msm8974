@@ -25,18 +25,12 @@
 #include <linux/earlysuspend.h>
 #endif
 
-#define MSM_CPUFREQ_LIMIT_MAJOR		2
-#define MSM_CPUFREQ_LIMIT_MINOR		0
+#include <soc/qcom/limiter.h>
 
-#define MSM_LIMIT			"msm_limiter"
-#define LIMITER_ENABLED			0
-#define DEFAULT_SUSPEND_DEFER_TIME	10
-#define DEFAULT_SUSPEND_FREQUENCY	1728000
-#define DEFAULT_RESUME_FREQUENCY	2265600
-#define DEFAULT_MIN_FREQUENCY		300000
+#define MSM_CPUFREQ_LIMIT_MAJOR		3
+#define MSM_CPUFREQ_LIMIT_MINOR		6
 
-static unsigned int debug = 0;
-module_param_named(debug_mask, debug, uint, 0644);
+static unsigned int debug_mask = 0;
 
 #define dprintk(msg...)		\
 do { 				\
@@ -44,28 +38,7 @@ do { 				\
 		pr_info(msg);	\
 } while (0)
 
-static struct cpu_limit {
-	unsigned int limiter_enabled;
-	uint32_t suspend_max_freq;
-	uint32_t resume_max_freq;
-	uint32_t suspend_min_freq;
-	unsigned int suspended;
-	unsigned int suspend_defer_time;
-	struct delayed_work suspend_work;
-	struct work_struct resume_work;
-	struct work_struct min_freq_work;
-	struct mutex msm_limiter_mutex;
-#ifdef CONFIG_LCD_NOTIFY
-	struct notifier_block notif;
-#endif
-} limit = {
-	.limiter_enabled = LIMITER_ENABLED,
-	.suspend_max_freq = DEFAULT_SUSPEND_FREQUENCY,
-	.resume_max_freq = DEFAULT_RESUME_FREQUENCY,
-	.suspend_min_freq = DEFAULT_MIN_FREQUENCY,
-	.suspended = 1,
-	.suspend_defer_time = DEFAULT_SUSPEND_DEFER_TIME,
-};
+
 
 static struct workqueue_struct *limiter_wq;
 
