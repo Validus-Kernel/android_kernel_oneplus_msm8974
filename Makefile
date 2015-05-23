@@ -345,7 +345,7 @@ OPTIMIZATIONS	:= -Ofast \
 
 LTO		:= -flto=4
 PIPE		:= -pipe
-DNDEBUG		:= -DNDEBUG
+DNDEBUG		:= -DNDEBUG -g0
 
 TUNE_FLAGS	:= -marm \
 		 -mtune=cortex-a15 \
