@@ -254,7 +254,7 @@
 #define POWER_STAGE_WA			BIT(2)
 /* OPPO 2013-06-08 wangjc Add begin for add macro. */
 #ifdef CONFIG_MACH_MSM8974_14001
-#define BATT_HEARTBEAT_INTERVAL					6000//6S
+#define BATT_HEARTBEAT_INTERVAL					40000//40S
 #define BATT_CHG_TIMEOUT_COUNT_DCP				10*10*60//sjc1125//6*10*60//4	//6HOURS
 #define BATT_CHG_TIMEOUT_COUNT_USB_PRO			10*10*60 //10HOURS
 #define BATT_CHG_DONE_CHECK_COUNT				10//TIMES
@@ -1975,12 +1975,7 @@ get_prop_battery_fcc(struct qpnp_chg_chip *chip)//sjc20150105
 static int
 get_prop_authenticate(struct qpnp_chg_chip *chip)
 {
-	if (qpnp_batt_gauge && qpnp_batt_gauge->is_battery_authenticated)
-		return qpnp_batt_gauge->is_battery_authenticated();
-	else {
-		pr_err("qpnp-charger no batt gauge assuming false\n");
-		return false;
-	}
+	return true;
 }
 #endif /*CONFIG_BATTERY_BQ27541*/
 
@@ -1989,12 +1984,7 @@ get_prop_authenticate(struct qpnp_chg_chip *chip)
 static int
 get_prop_fast_chg_started(struct qpnp_chg_chip *chip)
 {
-	if (qpnp_batt_gauge && qpnp_batt_gauge->fast_chg_started)
-		return qpnp_batt_gauge->fast_chg_started();
-	else {
-		pr_err("qpnp-charger no batt gauge assuming false\n");
-		return false;
-	}
+	return false;
 }
 
 static int
@@ -3488,7 +3478,7 @@ get_prop_batt_status(struct qpnp_chg_chip *chip)
 	}
 }
 
-int get_charging_status(void)//sjc20150104
+int qpnp_get_charging_status(void)//sjc20150104
 {
 	if (!g_chip) 
 		return POWER_SUPPLY_STATUS_DISCHARGING;
