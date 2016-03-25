@@ -4859,7 +4859,6 @@ static int synaptics_rmi4_resume(struct device *dev)
 {
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
 
-			atomic_read(&rmi4_data->flashlight_enable) ||
 	if (rmi4_data->staying_awake) {
 		return 0;
 	}
