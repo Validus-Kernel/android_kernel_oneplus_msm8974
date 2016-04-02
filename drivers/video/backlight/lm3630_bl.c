@@ -216,6 +216,7 @@ static int lm3630_intr_config(struct lm3630_chip_data *pchip)
 		state_notifier_call_chain(STATE_NOTIFIER_ACTIVE, NULL);
 #endif /*CONFIG_STATE_NOTIFIER*/
 
+#ifdef CONFIG_MACH_OPPO
 /* Xiaori.Yuan@Mobile Phone Software Dept.Driver, 2014/04/28  Add for add log for 14001 black screen */
 		if(pre_brightness == 0)
 			{pr_err("%s set brightness :  %d \n",__func__,bl_level);}
